@@ -55,6 +55,20 @@ export default function BibleApp() {
   const [completedDays, setCompletedDays] = useState(new Set());
   const [planTitle, setPlanTitle] = useState("Paul's Letters: 20 Days in the Epistles");
   const [planDescription, setPlanDescription] = useState("A 20-day journey through the letters of Paul — Romans, Corinthians, Galatians, Ephesians, Philippians, and Colossians — exploring grace, identity, love, and how to live as followers of Jesus.");
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState("");
+  const [adminPasswordError, setAdminPasswordError] = useState(false);
+
+  function attemptAdminUnlock() {
+    if (adminPasswordInput === "101pisgah") {
+      setAdminUnlocked(true);
+      setAdminPasswordError(false);
+      setAdminPasswordInput("");
+    } else {
+      setAdminPasswordError(true);
+      setAdminPasswordInput("");
+    }
+  }
 
   const todayEntry = plan.find(e => e.day === currentDay);
 
@@ -355,8 +369,48 @@ export default function BibleApp() {
         )}
 
         {/* ---- ADMIN TAB ---- */}
-        {tab === "Admin" && (
+        {tab === "Admin" && !adminUnlocked && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 20px" }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+            <div style={{ fontSize: 20, fontWeight: "bold", color: "#D8E6EE", fontFamily: "system-ui", marginBottom: 8 }}>Admin Access</div>
+            <div style={{ fontSize: 14, color: "#7A9BAD", fontFamily: "system-ui", marginBottom: 28, textAlign: "center" }}>Enter your password to manage the reading plan.</div>
+            <div style={{ width: "100%", maxWidth: 320 }}>
+              <input
+                type="password"
+                value={adminPasswordInput}
+                onChange={e => { setAdminPasswordInput(e.target.value); setAdminPasswordError(false); }}
+                onKeyDown={e => e.key === "Enter" && attemptAdminUnlock()}
+                placeholder="Enter password"
+                style={{
+                  width: "100%", background: "#162232", border: adminPasswordError ? "1px solid #EF4444" : "1px solid #2E5270",
+                  borderRadius: 8, padding: "12px 14px", color: "#E8EEF2",
+                  fontSize: 15, fontFamily: "system-ui", boxSizing: "border-box", marginBottom: 8, outline: "none",
+                }}
+              />
+              {adminPasswordError && (
+                <div style={{ fontSize: 13, color: "#EF4444", fontFamily: "system-ui", marginBottom: 8, textAlign: "center" }}>
+                  Incorrect password. Try again.
+                </div>
+              )}
+              <button onClick={attemptAdminUnlock} style={{
+                width: "100%", padding: "12px", borderRadius: 8, border: "none", cursor: "pointer",
+                background: "linear-gradient(135deg, #9F9F9C, #8A8A87)", color: "white",
+                fontSize: 15, fontFamily: "system-ui", fontWeight: 700,
+              }}>
+                Unlock
+              </button>
+            </div>
+          </div>
+        )}
+
+        {tab === "Admin" && adminUnlocked && (
           <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: "#9F9F9C", fontFamily: "system-ui" }}>🔓 Admin unlocked</div>
+              <button onClick={() => setAdminUnlocked(false)} style={{ background: "none", border: "1px solid #1E3547", borderRadius: 6, color: "#7A9BAD", cursor: "pointer", padding: "4px 12px", fontSize: 12, fontFamily: "system-ui" }}>
+                Lock
+              </button>
+            </div>
             <div style={{ marginBottom: 20, padding: "16px", borderRadius: 12, background: "#162232", border: "1px solid #1E3547" }}>
               <div style={{ fontSize: 14, fontWeight: "bold", color: "#D8E6EE", fontFamily: "system-ui", marginBottom: 12 }}>📋 Plan Settings</div>
               <input value={planTitle} onChange={e => setPlanTitle(e.target.value)}
